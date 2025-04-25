@@ -1,0 +1,26 @@
+name: refresh-nupl
+
+# ── run every day at 01:05 UTC ─────────────────────
+on:
+  schedule:
+    - cron: '5 1 * * *'     # minute hour DOM month DOW
+  workflow_dispatch:        # lets you run it manually
+
+jobs:
+  pull-and-commit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Download latest NUPL JSON
+        run: |
+          curl -s "https://bitcoin-data.com/api/v1/nupl" \
+            > nupl.json
+
+      - name: Commit & push if file changed
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'chore: weekly NUPL refresh'
+          branch: main
